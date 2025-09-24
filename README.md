@@ -21,23 +21,29 @@ It empowers users to research equities with **real-time price data, fundamentals
 
 ## 📸 Screenshots
 
+
+
 ### 🔍 Search Page
-![Search Screenshot](screenshots/2025-09-24-20_43_33-Settings.png)
+![Search Screenshot](screenshots/search.png)
 
 ### 🏢 Company Overview
-![Overview Screenshot](screenshots/2025-09-24-20_43_51-.png)
+![Overview Screenshot](screenshots/overview.png)
 
 ### 💰 Financials
-![Financials Screenshot](screenshots/2025-09-24-20_44_14-.png)
+![Financials Screenshot](screenshots/financials.png)
 
 ### 🏭 Sector Snapshot
-![Sector Screenshot](screenshots/2025-09-24-20_44_29-Settings.png)
+![Sector Screenshot](screenshots/sector.png)
 
 ### 📊 Technical Indicators
-![Technicals Screenshot](screenshots/2025-09-24-20_44_44-Settings.png)
+![Technicals Screenshot](screenshots/technicals.png)
 
 ### 📈 Stock Price Chart
-![Chart Screenshot](screenshots/2025-09-24-20_45_55-finance–index.html.png)
+![Chart Screenshot](screenshots/chart.png)
+
+### 📰 News Feed
+![News Screenshot](screenshots/news.png)
+
 
 
 ---
