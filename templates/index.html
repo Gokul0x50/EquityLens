@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>📊 EquityLens</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    body { background:#f4f6f9; font-family: "Segoe UI", sans-serif; }
+    .app-title { font-weight:600; color:#0d6efd; }
+    .card { border-radius:14px; border: none; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+    .nav-tabs .nav-link { font-weight:500; }
+    .nav-tabs .nav-link.active { background:#0d6efd; color:#fff !important; border-radius:8px 8px 0 0; }
+    .metric-card { flex:1 1 180px; margin:8px; padding:14px; text-align:center; border-radius:10px; background:white; box-shadow:0 1px 6px rgba(0,0,0,0.06); }
+    pre.summary { white-space:pre-wrap; word-wrap:break-word; font-size:0.95rem; }
+    .table { font-size:0.9rem; }
+  </style>
+</head>
+<body>
+<div class="container py-4">
+
+  <!-- App Title -->
+  <div class="text-center mb-4">
+    <h2 class="app-title">📊 EquityLens</h2>
+    <p class="text-muted">Search NSE stocks and explore real-time insights, financials, charts & more</p>
+    <form method="POST" action="/" class="d-flex justify-content-center mt-3">
+      <input type="text" name="ticker" placeholder="Enter Stock (e.g. TCS)" class="form-control w-50 me-2 shadow-sm" required>
+      <button class="btn btn-primary px-4 shadow-sm">Search</button>
+    </form>
+  </div>
+
+  {% if stock_info %}
+  <!-- Tabs -->
+  <ul class="nav nav-tabs justify-content-center" id="stockTabs">
+    <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#overview">Overview</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#financials">Financials</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#sector">Sector Snapshot</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#technicals">Technicals</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#chart">Chart</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#news">News</a></li>
+    <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#people">People</a></li>
+  </ul>
+
+  <div class="tab-content mt-4">
+
+    <!-- Overview -->
+    <div class="tab-pane fade show active" id="overview">
+      <div class="card p-4">
+        <h4 class="mb-3">{{ stock_info.longName }}</h4>
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Sector:</strong> {{ stock_info.sector }}</p>
+            <p><strong>Industry:</strong> {{ stock_info.industry }}</p>
+            <p><strong>Current Price:</strong> {{ stock_info.currentPriceFormatted }}</p>
+            <p><strong>Market Cap:</strong> {{ stock_info.marketCapFormatted }}</p>
+            <p><strong>P/E Ratio:</strong> {{ stock_info.peRatio }}</p>
+          </div>
+          <div class="col-md-6">
+            <p><strong>52W High:</strong> {% if stock_info.fiftyTwoWeekHigh %} ₹{{ "{:,.2f}".format(stock_info.fiftyTwoWeekHigh) }} {% else %} N/A {% endif %}</p>
+            <p><strong>52W Low:</strong> {% if stock_info.fiftyTwoWeekLow %} ₹{{ "{:,.2f}".format(stock_info.fiftyTwoWeekLow) }} {% else %} N/A {% endif %}</p>
+            <p><strong>Beta:</strong> {{ stock_info.beta }}</p>
+            <p><strong>Website:</strong> <a href="{{ stock_info.website }}" target="_blank">{{ stock_info.website }}</a></p>
+            <p><strong>BSE Code:</strong> {{ stock_info.bseCode }} | <strong>NSE:</strong> {{ stock_info.nseCode }}</p>
+          </div>
+        </div>
+        <hr>
+        <p><strong>About:</strong></p>
+        <pre class="summary">{{ stock_info.summary }}</pre>
+      </div>
+    </div>
+
+    <!-- Financials -->
+    <div class="tab-pane fade" id="financials">
+      <div class="p-2">
+        <h4>Key Financial Metrics</h4>
+        <div class="d-flex flex-wrap">
+          {% for key, value in key_metrics.items() %}
+            <div class="metric-card">
+              <strong>{{ key }}</strong>
+              <div class="mt-2">{{ value }}</div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <h4 class="mt-4">Key Ratios</h4>
+        <div class="d-flex flex-wrap">
+          {% for key, value in ratios.items() %}
+            <div class="metric-card">
+              <strong>{{ key }}</strong>
+              <div class="mt-2">{{ value }}</div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <h4 class="mt-4">Quarterly Financials</h4>
+        <a href="/download/{{ ticker }}" class="btn btn-success mb-3">⬇ Download Report</a>
+        <div class="table-responsive">
+          {% if financials is defined and not financials.empty %}
+            {{ financials.to_html(classes='table table-striped table-hover shadow-sm', index=False) | safe }}
+          {% else %}
+            <p>No quarterly financials available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Sector Snapshot -->
+    <div class="tab-pane fade" id="sector">
+      <div class="card p-4">
+        {% if sector_data %}
+          <p><strong>Sector:</strong> {{ sector_data.sector }}</p>
+          <p><strong>Industry:</strong> {{ sector_data.industry }}</p>
+          <p><strong>Stock P/E:</strong> {{ sector_data.stockPE }}</p>
+          <p><strong>Sector Avg P/E:</strong> {{ sector_data.sectorPE }}</p>
+          <p><strong>Sector Avg P/B:</strong> {{ sector_data.sectorPB }}</p>
+          <p><strong>Sector Avg Dividend Yield:</strong> {{ sector_data.sectorDivYield }}</p>
+        {% else %}
+          <p>No sector snapshot available.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Technicals -->
+    <div class="tab-pane fade" id="technicals">
+      <h4>📈 Technical Indicators</h4>
+      <div class="d-flex flex-wrap">
+        {% if technicals %}
+          {% for key, value in technicals.items() %}
+            <div class="metric-card">
+              <strong>{{ key }}</strong>
+              <div class="mt-2">{{ value }}</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p>No technical indicator data available.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="tab-pane fade" id="chart">
+      <h4>📊 Stock Price Chart</h4>
+      <div class="tradingview-widget-container">
+        <div id="tradingview_chart"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+        <script type="text/javascript">
+          new TradingView.widget({
+            "width": "100%",
+            "height": 520,
+            "symbol": "BSE:{{ stock_info.bseCode }}",
+            "interval": "D",
+            "theme": "light",
+            "style": "1",
+            "locale": "en",
+            "container_id": "tradingview_chart"
+          });
+        </script>
+      </div>
+    </div>
+
+    <!-- News -->
+    <div class="tab-pane fade" id="news">
+      <h4>📰 Latest News</h4>
+      <ul class="list-group">
+        {% if news %}
+          {% for item in news %}
+            <li class="list-group-item">
+              <a href="{{ item.link }}" target="_blank">{{ item.title }}</a>
+              <small class="text-muted d-block">{{ item.published }}</small>
+            </li>
+          {% endfor %}
+        {% else %}
+          <li class="list-group-item">No news available.</li>
+        {% endif %}
+      </ul>
+    </div>
+
+    <!-- People -->
+    <div class="tab-pane fade" id="people">
+      <h4>💬 What People Think About {{ ticker }}</h4>
+      {% if ticker %}
+        <a class="twitter-timeline" data-theme="light" data-height="600"
+           href="https://twitter.com/search?q=%23{{ ticker }}%20stock&src=typed_query&f=live">
+          Tweets about #{{ ticker }}
+        </a>
+        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+      {% else %}
+        <p>Search a stock to load Twitter results.</p>
+      {% endif %}
+    </div>
+
+  </div>
+  {% endif %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
