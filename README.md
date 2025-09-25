@@ -16,7 +16,7 @@ It empowers users to research equities with **real-time price data, fundamentals
 
 ---
 
-## 🖼️ Screenshots
+
 
 
 ## 📸 Screenshots
